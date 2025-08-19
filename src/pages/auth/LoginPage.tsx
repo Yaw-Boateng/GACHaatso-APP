@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // useNavigate is no longer needed here
 import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
@@ -9,7 +9,6 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { signIn } = useAuth();
-  const navigate = useNavigate();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,8 +16,8 @@ const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      await signIn(email, password);
-      navigate('/profile');
+      // The signIn function now handles role-based redirection
+      await signIn(email, password); 
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {
@@ -27,6 +26,7 @@ const LoginPage = () => {
   };
 
   return (
+    // The rest of your component's JSX remains the same
     <div className="pt-20 min-h-screen bg-neutral-50">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto bg-white rounded-xl shadow-soft p-8">
