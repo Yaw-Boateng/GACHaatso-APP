@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Calendar, Clock, MapPin, Search, Filter, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, Clock, MapPin, Search, ArrowRight, Filter, X } from 'lucide-react';
 import { format, parseISO, isFuture, isPast } from 'date-fns';
 
 // Mock events data
@@ -7,8 +7,8 @@ const mockEvents = [
   {
     id: '1',
     title: 'Annual Community Outreach',
-    date: '2025-07-15T09:00:00',
-    endDate: '2025-07-15T15:00:00',
+    date: '2026-07-15T09:00:00',
+    endDate: '2026-07-15T15:00:00',
     location: 'Harbor City Park',
     description: 'Join us as we serve our local community with food, clothing, and resources for those in need.',
     image: 'https://images.pexels.com/photos/6646918/pexels-photo-6646918.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -18,8 +18,8 @@ const mockEvents = [
   {
     id: '2',
     title: 'Youth Summer Camp',
-    date: '2025-08-01T08:00:00',
-    endDate: '2025-08-05T16:00:00',
+    date: '2026-08-01T08:00:00',
+    endDate: '2026-08-05T16:00:00',
     location: 'Mountain Retreat Center',
     description: 'A week of fun, fellowship, and spiritual growth for students grades 6-12.',
     image: 'https://images.pexels.com/photos/442559/pexels-photo-442559.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -28,9 +28,9 @@ const mockEvents = [
   },
   {
     id: '3',
-    title: 'Women\'s Conference',
-    date: '2025-09-25T18:00:00',
-    endDate: '2025-09-27T21:00:00',
+    title: "Women's Conference",
+    date: '2026-09-25T18:00:00',
+    endDate: '2026-09-27T21:00:00',
     location: 'Grace Harbor Church',
     description: 'A weekend of worship, teaching, and connection designed to encourage and empower women in their faith journey.',
     image: 'https://images.pexels.com/photos/8108063/pexels-photo-8108063.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -40,8 +40,8 @@ const mockEvents = [
   {
     id: '4',
     title: 'Father-Son Fishing Trip',
-    date: '2025-06-10T06:00:00',
-    endDate: '2025-06-10T14:00:00',
+    date: '2026-06-10T06:00:00',
+    endDate: '2026-06-10T14:00:00',
     location: 'Harbor Lake',
     description: 'A day of fishing, food, and fellowship for fathers and sons of all ages.',
     image: 'https://images.pexels.com/photos/6130723/pexels-photo-6130723.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -51,10 +51,10 @@ const mockEvents = [
   {
     id: '5',
     title: 'Easter Sunday Services',
-    date: '2025-04-05T08:00:00',
-    endDate: '2025-04-05T13:00:00',
+    date: '2026-04-05T08:00:00',
+    endDate: '2026-04-05T13:00:00',
     location: 'Grace Harbor Church',
-    description: 'Join us for special Easter services celebrating the resurrection of Jesus Christ. Services at 8:00 AM, 10:00 AM, and 12:00 PM.',
+    description: 'Join us for special Easter services celebrating the resurrection of Jesus Christ.',
     image: 'https://images.pexels.com/photos/1448709/pexels-photo-1448709.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
     category: 'Worship',
     detailsUrl: '/events/5',
@@ -62,271 +62,217 @@ const mockEvents = [
   {
     id: '6',
     title: 'Financial Peace Workshop',
-    date: '2025-10-12T18:30:00',
-    endDate: '2025-10-12T20:30:00',
+    date: '2026-10-12T18:30:00',
+    endDate: '2026-10-12T20:30:00',
     location: 'Grace Harbor Church',
     description: 'Learn biblical principles for managing your finances and achieving financial freedom.',
     image: 'https://images.pexels.com/photos/6693661/pexels-photo-6693661.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
     category: 'Classes',
     detailsUrl: '/events/6',
   },
-  {
-    id: '7',
-    title: 'Christmas Eve Candlelight Service',
-    date: '2024-12-24T19:00:00',
-    endDate: '2024-12-24T20:30:00',
-    location: 'Grace Harbor Church',
-    description: 'A beautiful service of carols, scripture readings, and candlelight celebrating the birth of Christ.',
-    image: 'https://images.pexels.com/photos/3149896/pexels-photo-3149896.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-    category: 'Worship',
-    detailsUrl: '/events/7',
-  },
 ];
 
-// Categories for filtering
-const categories = [
-  'All',
-  'Worship',
-  'Outreach',
-  'Youth',
-  'Conference',
-  'Fellowship',
-  'Classes',
-];
+const categories = ['All', 'Worship', 'Outreach', 'Youth', 'Conference', 'Fellowship', 'Classes'];
 
 const EventsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [timeFilter, setTimeFilter] = useState('upcoming'); // 'upcoming', 'past', 'all'
-  
-  // Filter events based on search term, selected category, and time filter
-  const filteredEvents = mockEvents.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                        event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        event.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
-    
+  const [timeFilter, setTimeFilter] = useState('upcoming');
+
+  // Filter Logic
+  const filteredEvents = mockEvents.filter((event) => {
     const eventDate = parseISO(event.date);
-    const matchesTime = 
+    
+    const matchesSearch = 
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
+
+    const matchesTime =
       timeFilter === 'all' ||
       (timeFilter === 'upcoming' && isFuture(eventDate)) ||
       (timeFilter === 'past' && isPast(eventDate));
-    
+
     return matchesSearch && matchesCategory && matchesTime;
   });
 
-  // Sort events by date
+  // Sort Logic
   const sortedEvents = [...filteredEvents].sort((a, b) => {
-    return timeFilter === 'past' 
-      ? parseISO(b.date).getTime() - parseISO(a.date).getTime() // newest first for past events
-      : parseISO(a.date).getTime() - parseISO(b.date).getTime(); // oldest first for upcoming
+    const dateA = parseISO(a.date).getTime();
+    const dateB = parseISO(b.date).getTime();
+    return timeFilter === 'past' ? dateB - dateA : dateA - dateB;
   });
 
   return (
-    <div className="pt-20">
+    <div className="min-h-screen bg-neutral-50 transition-colors duration-300 dark:bg-[#0a0f1a] pt-16">
       {/* Hero Section */}
-      <section className="relative py-24 bg-primary-700 text-white">
+      <section className="bg-primary-700 dark:bg-primary-900 py-20 text-white transition-colors">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-white">
-              Events & Calendar
-            </h1>
-            <p className="text-xl mb-0 text-white/90">
-              Join us for upcoming events, services, and activities for the whole family.
+            <h1 className="mb-6 font-serif text-4xl font-bold md:text-5xl text-white">Events & Calendar</h1>
+            <p className="text-xl text-white/90">
+              Discover opportunities to connect, grow, and serve with our church family.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Search and Filter Section */}
-      <section className="py-8 bg-white border-b border-neutral-200">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4 justify-between">
+      {/* Filters Section */}
+      <section className="sticky top-16 z-10 border-b bg-white/80 backdrop-blur-md dark:bg-neutral-900/80 dark:border-neutral-800 shadow-sm transition-colors">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             {/* Search */}
-            <div className="relative max-w-md w-full">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={18} className="text-neutral-400" />
-              </div>
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
               <input
                 type="text"
                 placeholder="Search events..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-200 focus:border-primary-600 transition"
+                className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 py-3 pl-10 pr-4 transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary-900/30 outline-none"
               />
             </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Time Filter */}
-              <div className="flex items-center space-x-2">
-                <span className="text-neutral-600">Show:</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setTimeFilter('upcoming')}
-                    className={`px-3 py-1 text-sm rounded-full transition ${
-                      timeFilter === 'upcoming'
-                        ? 'bg-accent-600 text-white'
-                        : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                    }`}
-                  >
-                    Upcoming
-                  </button>
-                  <button
-                    onClick={() => setTimeFilter('past')}
-                    className={`px-3 py-1 text-sm rounded-full transition ${
-                      timeFilter === 'past'
-                        ? 'bg-accent-600 text-white'
-                        : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                    }`}
-                  >
-                    Past
-                  </button>
-                  <button
-                    onClick={() => setTimeFilter('all')}
-                    className={`px-3 py-1 text-sm rounded-full transition ${
-                      timeFilter === 'all'
-                        ? 'bg-accent-600 text-white'
-                        : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                    }`}
-                  >
-                    All
-                  </button>
-                </div>
-              </div>
-              
-              {/* Category Filter */}
-              <div className="flex items-center space-x-2">
-                <Filter size={18} className="text-neutral-500" />
-                <div className="flex flex-wrap gap-2">
-                  {categories.map(category => (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                      className={`px-3 py-1 text-sm rounded-full transition ${
-                        selectedCategory === category
-                          ? 'bg-primary-600 text-white'
-                          : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              </div>
+
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    selectedCategory === cat
+                      ? 'bg-primary-600 text-white shadow-md'
+                      : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Time Toggle */}
+            <div className="flex rounded-lg bg-neutral-100 dark:bg-neutral-800 p-1">
+              {['upcoming', 'past', 'all'].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setTimeFilter(filter)}
+                  className={`rounded-md px-4 py-1.5 text-sm font-medium capitalize transition-all ${
+                    timeFilter === filter
+                      ? 'bg-white dark:bg-neutral-700 text-primary-700 dark:text-primary-400 shadow-sm'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Events List */}
-      <section className="py-12">
-  <div className="container mx-auto px-4">
-    {sortedEvents.length > 0 ? (
-      <div className="grid gap-8 md:gap-10 lg:grid-cols-2">
-        {sortedEvents.map(event => (
-          <div
-            key={event.id}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col md:flex-row"
-          >
-            {/* Image */}
-            <div className="md:w-1/3 h-56 md:h-auto">
-              <img
-                src={event.image}
-                alt={event.title}
-                className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-
-            {/* Content */}
-            <div className="md:w-2/3 p-6 flex flex-col">
-              {/* Category */}
-              <span className="inline-block px-3 py-1 text-xs font-semibold bg-primary-50 text-primary-600 rounded-full mb-3">
-                {event.category}
-              </span>
-
-              {/* Title */}
-              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
-                {event.title}
-              </h3>
-
-              {/* Description */}
-              <p className="text-gray-600 text-sm md:text-base line-clamp-3 mb-4">
-                {event.description}
-              </p>
-
-              {/* Meta Info */}
-              <div className="mt-auto space-y-2 text-sm text-gray-500">
-                <div className="flex items-center">
-                  <Calendar size={16} className="mr-2 text-primary-600" />
-                  <span>
-                    {format(parseISO(event.date), 'MMMM d, yyyy')}
-                    {event.endDate &&
-                      parseISO(event.date).toDateString() !== parseISO(event.endDate).toDateString() &&
-                      ` - ${format(parseISO(event.endDate), 'MMMM d, yyyy')}`}
-                  </span>
-                </div>
-
-                <div className="flex items-center">
-                  <Clock size={16} className="mr-2 text-primary-600" />
-                  <span>
-                    {format(parseISO(event.date), 'h:mm a')}
-                    {event.endDate && ` - ${format(parseISO(event.endDate), 'h:mm a')}`}
-                  </span>
-                </div>
-
-                <div className="flex items-center">
-                  <MapPin size={16} className="mr-2 text-primary-600" />
-                  {event.location}
-                </div>
+      {/* Events Grid */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          {sortedEvents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="mb-4 rounded-full bg-neutral-200 dark:bg-neutral-800 p-6 text-neutral-400 dark:text-neutral-600">
+                <Filter className="h-12 w-12" />
               </div>
-
-              {/* Action Button */}
-              <div className="mt-6">
-                <a
-                  href={event.detailsUrl}
-                  className="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-medium rounded-lg shadow hover:bg-primary-700 hover:shadow-md transition-all duration-300"
+              <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">No events found</h3>
+              <p className="mt-2 text-neutral-600 dark:text-neutral-400">Try adjusting your filters or search keywords.</p>
+              <button 
+                onClick={() => { setSearchTerm(''); setSelectedCategory('All'); setTimeFilter('all'); }}
+                className="mt-6 font-medium text-primary-600 dark:text-primary-400 hover:underline"
+              >
+                Reset all filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {sortedEvents.map((event) => (
+                <article
+                  key={event.id}
+                  className="group flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-lg dark:shadow-2xl transition-all hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-primary-900/10 border border-transparent dark:border-neutral-800"
                 >
-                  {isFuture(parseISO(event.date)) ? "Register" : "View Details"}
-                  <ArrowRight size={16} className="ml-2" />
-                </a>
-              </div>
+                  {/* Image Container */}
+                  <div className="relative h-52 overflow-hidden">
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute left-4 top-4">
+                      <span className="rounded-full bg-white/95 dark:bg-neutral-900/95 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary-700 dark:text-primary-400 shadow-sm">
+                        {event.category}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="flex flex-1 flex-col p-6">
+                    <h3 className="mb-3 font-serif text-xl font-bold text-neutral-900 dark:text-neutral-100 transition-colors group-hover:text-primary-700 dark:group-hover:text-primary-400">
+                      {event.title}
+                    </h3>
+
+                    <div className="mb-4 space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
+                      <div className="flex items-center">
+                        <Calendar className="mr-2 h-4 w-4 text-primary-600 dark:text-primary-500" />
+                        <span>{format(parseISO(event.date), 'MMMM do, yyyy')}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="mr-2 h-4 w-4 text-primary-600 dark:text-primary-500" />
+                        <span>
+                          {format(parseISO(event.date), 'h:mm a')} - {format(parseISO(event.endDate), 'h:mm a')}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <MapPin className="mr-2 h-4 w-4 text-primary-600 dark:text-primary-500" />
+                        <span className="line-clamp-1">{event.location}</span>
+                      </div>
+                    </div>
+
+                    <p className="mb-6 line-clamp-3 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                      {event.description}
+                    </p>
+
+                    <div className="mt-auto border-t border-neutral-100 dark:border-neutral-800 pt-5">
+                      <a
+                        href={event.detailsUrl}
+                        className="inline-flex items-center font-bold text-primary-600 dark:text-primary-400 transition-colors hover:text-primary-800 dark:hover:text-primary-300"
+                      >
+                        Learn More
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <div className="text-center py-12">
-        <h3 className="text-xl font-medium text-gray-700 mb-2">No events found</h3>
-        <p className="text-gray-500">Try adjusting your search or filter criteria</p>
-      </div>
-    )}
-  </div>
-</section>
+          )}
+        </div>
+      </section>
 
-
-      {/* Subscribe Section */}
-      <section className="py-16 bg-primary-50">
+      {/* Newsletter Section */}
+      <section className="bg-primary-700 dark:bg-primary-950 py-20 text-white transition-colors">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-serif font-bold mb-6 text-primary-800">
-              Stay Updated on Church Events
-            </h2>
-            <p className="text-lg mb-8 text-neutral-700">
-              Sign up for our weekly newsletter to get event notifications, service times, and important church announcements.
+          <div className="mx-auto max-w-2xl">
+            <h2 className="mb-4 font-serif text-3xl font-bold text-white">Never Miss an Event</h2>
+            <p className="mb-8 text-lg text-white/80">
+              Sign up for our weekly bulletin to get event updates and community news delivered to your inbox.
             </p>
-            <div className="max-w-md mx-auto">
-              <form className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="flex-grow px-4 py-3 rounded-md border border-neutral-300 focus:ring-2 focus:ring-primary-200 focus:border-primary-600 transition"
-                />
-                <button type="submit" className="btn btn-primary whitespace-nowrap">
-                  Subscribe
-                </button>
-              </form>
-            </div>
+            <form className="flex flex-col gap-4 sm:flex-row" onSubmit={(e) => e.preventDefault()}>
+              <input
+                type="email"
+                placeholder="Enter your email address"
+                className="flex-1 rounded-lg border-none px-6 py-4 text-neutral-900 dark:bg-neutral-800 dark:text-white outline-none ring-primary-100 dark:ring-primary-900/50 focus:ring-4 transition-all"
+                required
+              />
+              <button className="rounded-lg bg-white dark:bg-primary-500 px-8 py-4 font-bold text-primary-700 dark:text-white transition hover:bg-primary-50 dark:hover:bg-primary-400 active:scale-95">
+                Subscribe Now
+              </button>
+            </form>
           </div>
         </div>
       </section>

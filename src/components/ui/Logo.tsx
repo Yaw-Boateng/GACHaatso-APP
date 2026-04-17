@@ -7,7 +7,7 @@ const Logo = ({ color = "primary" }: LogoProps) => {
 
   return (
     <div className="flex items-center">
-      <span className={`${textColor} font-serif text-xl font-bold`}>
+      <span className={`${textColor} font-serif text-xl font-bold  `}>
         GAC-Bethel Center
       </span>
     </div>

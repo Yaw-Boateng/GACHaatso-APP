@@ -61,15 +61,15 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="text-neutral-300">
                 <span className="block font-medium text-white">Sunday Service</span>
-                9:00 AM & 11:00 AM
+                8:00 AM To 10:30 AM
               </li>
               <li className="text-neutral-300">
-                <span className="block font-medium text-white">Wednesday Bible Study</span>
-                7:00 PM
+                <span className="block font-medium text-white">Tuesday Midweek Service</span>
+                6:30 PM To 8:30 PM
               </li>
               <li className="text-neutral-300">
-                <span className="block font-medium text-white">Youth Service</span>
-                Friday 6:00 PM
+                <span className="block font-medium text-white">Last Friday Of Every Month</span>
+                 8:30 PM To Midnight
               </li>
             </ul>
           </div>
@@ -80,7 +80,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <MapPin size={20} className="text-secondary-500 mt-1 flex-shrink-0" />
-                <span className="text-neutral-300">123 Church Street<br />Harbor City, NY 10001</span>
+                <span className="text-neutral-300">GAC - Haatso<br />Behind Green Hostel</span>
               </li>
               <li className="flex items-center space-x-3">
                 <Phone size={20} className="text-secondary-500 flex-shrink-0" />
@@ -91,7 +91,7 @@ const Footer = () => {
               <li className="flex items-center space-x-3">
                 <Mail size={20} className="text-secondary-500 flex-shrink-0" />
                 <a href="mailto:info@graceharbor.church" className="text-neutral-300 hover:text-white transition-colors">
-                  info@graceharbor.church
+                  gachaatso@gmail.com
                 </a>
               </li>
             </ul>
