@@ -12,6 +12,8 @@ import LoadingSpinner from "./components/ui/LoadingSpinner";
 import RegisterPage from "./pages/auth/RegisterPage";
 import AddMemberPage from "./pages/dashboard/subpages/AddMemberPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute"; // Import here
+import ForgotPasswordPage from "./pages/dashboard/subpages/ForgotPasswordPage";
+import EventDetailPage from "./pages/dashboard/subpages/EventDetailPage";
 
 // --- LAZY LOADED PAGES ---
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -22,17 +24,18 @@ const ContactPage = lazy(() => import("./pages/ContactPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
+const ResetPasswordPage = lazy(() => import("./pages/dashboard/subpages/ResetPasswordPage")); // Adjust path if needed
 
 // Dashboard Sub-pages
 const StatsPage = lazy(() => import("./pages/dashboard/subpages/StatsPage"));
 const MembersPage = lazy(() => import("./pages/dashboard/subpages/MembersPage"));
-const FinancesPage = lazy(() => import("./pages/dashboard/subpages/FinancesPage"));
+const LeadersPage = lazy(() => import("./pages/dashboard/subpages/LeadersPage"));
 const AttendancePage = lazy(() => import("./pages/dashboard/subpages/AttendancePage"));
 const ResourcesPage = lazy(() => import("./pages/dashboard/subpages/ResourcesPage"));
-const EventsPage = lazy(() => import("./pages/dashboard/subpages/EventsPage"));
+const EventsDashboard = lazy(() => import("./pages/dashboard/subpages/EventsDashboard"));
 const GroupPage = lazy(() => import("./pages/dashboard/subpages/GroupPage"));
 const MessagesPage = lazy(() => import("./pages/dashboard/subpages/MessagesPage"));
-const NotificationsPage = lazy(() => import("./pages/dashboard/subpages/NotificationsPage"));
+const EventsPage = lazy(() => import("./pages/dashboard/subpages/EventsPage"));
 const SettingsPage = lazy(() => import("./pages/dashboard/subpages/SettingsPage"));
 
 function App() {
@@ -54,12 +57,14 @@ function App() {
               <Route path="about" element={<AboutPage />} />
               <Route path="sermons" element={<SermonsPage />} />
               <Route path="events" element={<EventsPage />} />
+              <Route path="/events/:eventId" element={<EventDetailPage />} />
               <Route path="giving" element={<GivingPage />} />
               <Route path="contact" element={<ContactPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
               <Route path="*" element={<NotFoundPage />} />
-            </Route>
+<Route path="forgot-password" element={<ForgotPasswordPage />} />
+<Route path="reset-password" element={<ResetPasswordPage />} />            </Route>
 
             {/* GROUP 2: DASHBOARD SYSTEM (Protected) */}
             <Route 
@@ -73,13 +78,13 @@ function App() {
               <Route path="stats" element={<StatsPage />} />
               <Route path="members" element={<MembersPage />} />
               <Route path="members/add" element={<AddMemberPage />} />
-              <Route path="finances" element={<FinancesPage />} />
+              <Route path="leaders" element={<LeadersPage />} />
               <Route path="attendance" element={<AttendancePage />} />
               <Route path="resources" element={<ResourcesPage />} />
               <Route path="events" element={<EventsPage />} />
               <Route path="group" element={<GroupPage />} />
               <Route path="messages" element={<MessagesPage />} />
-              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="eventsdb" element={<EventsDashboard />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Routes>

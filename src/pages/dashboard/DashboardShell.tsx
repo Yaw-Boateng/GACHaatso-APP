@@ -14,7 +14,7 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children, role }) => {
       <Sidebar role={role} /> {/* Now your dynamic sidebar will show up */}
 
       <div className="flex-1 flex flex-col">
-        <header className="h-20 border-b border-theme-border flex items-center justify-between px-6 md:px-8 bg-theme-surface/50 backdrop-blur-md sticky top-0 z-30">
+        <header className="h-20 border-b border-theme-border flex items-center justify-between px-6 md:px-8 bg-theme-surface/50 backdrop-blur-md sticky top-0">
           <div className="flex flex-col">
             <h1 className="text-xl font-bold capitalize text-theme-text">{role.toLowerCase()} Panel</h1>
             <p className="text-[10px] uppercase tracking-widest text-primary-600 font-bold">GAC Church Management</p>

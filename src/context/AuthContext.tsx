@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface User {
@@ -7,7 +7,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   role: 'ADMIN' | 'LEADER' | 'MEMBER';
-  token?: string; // Add this to store your JWT
+  token?: string; 
 }
 
 interface AuthContextType {
@@ -16,6 +16,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (data: any) => Promise<any>;
   signOut: () => void;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,87 +29,98 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // Initialize state from localStorage so user stays logged in on refresh
   const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('gac_user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      const savedUser = localStorage.getItem('gac_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
   });
   
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // Persist user to localStorage whenever it changes
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('gac_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('gac_user');
+  // Added useCallback to the import above to fix your error
+  const signOut = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem('gac_user');
+    navigate('/login');
+  }, [navigate]);
+
+  const signUp = async (registrationData: any) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(registrationData),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Registration failed');
+      return result;
+    } finally {
+      setLoading(false);
     }
-  }, [user]);
-
- const signUp = async (registrationData: any) => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify(registrationData),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result.message || 'Registration failed');
-  }
-
-  return result;
-};
+  };
 
   const signIn = async (email: string, password: string) => {
-  setLoading(true);
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const result = await response.json();
-    
-    // DEBUGGING: Remove this once you confirm it works!
-    console.log("Backend Response:", result);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Invalid credentials');
 
-    if (!response.ok) throw new Error(result.message || 'Invalid credentials');
-    
-      // Assuming your backend returns user data in result.data or result
       const userData: User = {
         uid: result.data?.id || result.id,
         email: result.data?.email || result.email,
         firstName: result.data?.firstName || result.firstName,
+        lastName: result.data?.lastName || result.lastName,
         role: result.data?.role || result.role,
         token: result.data?.token || result.token, 
       };
 
       setUser(userData);
-      navigate('/dashboard/stats'); // Navigate to a specific subpage
+      localStorage.setItem('gac_user', JSON.stringify(userData));
+      navigate('/dashboard/stats');
     } catch (error: any) {
-      console.error("Login failed:", error.message);
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const signOut = () => {
-    setUser(null);
-    localStorage.removeItem('gac_user');
-    navigate('/login');
+  const forgotPassword = async (email: string) => {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Failed to send reset email');
+  };
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    const response = await fetch(`${API_BASE_URL}auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ token, newPassword }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Password reset failed');
+    return result;
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, forgotPassword, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

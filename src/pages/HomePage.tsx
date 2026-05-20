@@ -340,15 +340,15 @@ const HomePage = () => {
               <h2 className="text-4xl md:text-5xl font-serif font-bold mb-8 leading-tight text-white">
                 A Message From Our Pastor
               </h2>
-              <div className="space-y-6 text-xl text-neutral-300 hover:text-white font-light leading-relaxed">
-                <p>"Welcome to Gospel Ambassadors Church - Bethel Center. Our mission is to create a place where everyone can experience God's love..."</p>
-                <p>"Whether you're beginning your journey or have been following for years, you're welcome here."</p>
+              <div className="space-y-6 text-xl text-[#dadfeb] font-light leading-relaxed">
+                <p className="text-[#dadfeb]">"Welcome to Gospel Ambassadors Church - Bethel Center. Our mission is to create a place where everyone can experience God's love..."</p>
+                <p className="text-[#dadfeb]">"Whether you're beginning your journey or have been following for years, you're welcome here."</p>
               </div>
               <div className="mt-12 flex items-center gap-6">
                 <div className="w-16 h-0.5 bg-secondary-500"></div>
                 <div>
                   <p className="font-serif text-2xl font-bold text-neutral-300 hover:text-white">Rev Daniel A. Okyere</p>
-                  <p className="text-secondary-400 text-sm font-bold uppercase tracking-[0.2em] mt-1">Lead Pastor</p>
+                  <p className="text-secondary-400 text-sm font-bold uppercase text-[#f7f7eb] tracking-[0.2em] mt-1">Lead Pastor</p>
                 </div>
               </div>
             </div>

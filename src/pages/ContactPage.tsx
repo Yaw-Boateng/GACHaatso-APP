@@ -9,7 +9,7 @@ import {
   Lock, 
   Eye 
 } from "lucide-react";
-import { useSendMessage } from "../hooks/useMessages";
+import { useSendMessage } from "../hooks/useMessages.js";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -18,8 +18,6 @@ const ContactPage = () => {
     phone: "",
     messageType: "GENERAL_ENQUIRY",
     message: "",
-    isPrayerRequest: false,
-    isPrivate: true,
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -32,8 +30,6 @@ const ContactPage = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      // Logic to toggle prayer request status based on selection
-      isPrayerRequest: name === "messageType" ? value === "PRAYER_REQUEST" : prev.isPrayerRequest,
     }));
   };
 
@@ -45,19 +41,17 @@ const ContactPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Trigger mutation to your Render backend
+    // Trigger mutation to backend
     mutate(formData, {
       onSuccess: () => {
         setIsSubmitted(true);
-        // Reset form on success
+        // Reset form to initial state
         setFormData({
           name: "", 
           email: "", 
           phone: "", 
           messageType: "GENERAL_ENQUIRY", 
           message: "",
-          isPrayerRequest: false, 
-          isPrivate: true,
         });
       },
     });
@@ -110,7 +104,6 @@ const ContactPage = () => {
                 </div>
               </div>
 
-              {/* Privacy/Prayer Notice */}
               <div className="bg-primary-50 dark:bg-primary-900/10 p-8 rounded-3xl border border-primary-100 dark:border-primary-800/50">
                 <div className="flex items-center gap-3 mb-4 text-primary-700 dark:text-primary-400">
                   <MessageSquare size={24} />
@@ -138,14 +131,14 @@ const ContactPage = () => {
                       </div>
                       <div>
                         <label className={formLabelClass}>Phone Number</label>
-                        <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Optional" className={formInputClass} />
+                        <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Enter your phone number" className={formInputClass} />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className={formLabelClass}>Email Address</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="email@example.com" className={formInputClass} required />
+                        <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="email@example.com" className={formInputClass}  />
                       </div>
                       <div>
                         <label className={formLabelClass}>Inquiry Type</label>
@@ -159,28 +152,18 @@ const ContactPage = () => {
                     </div>
 
                     {/* Conditional Toggle for Prayer Requests */}
-                    {formData.messageType === "PRAYER_REQUEST" && (
-                      <div className="p-4 bg-primary-50 dark:bg-primary-900/10 rounded-xl border border-primary-100 dark:border-primary-800/50 flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-primary-700 dark:text-primary-400">
-                          {formData.isPrivate ? <Lock size={18}/> : <Eye size={18}/>}
-                          <span className="text-sm font-semibold">Keep this request private?</span>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" name="isPrivate" checked={formData.isPrivate} onChange={handleCheckboxChange} className="sr-only peer" />
-                          <div className="w-11 h-6 bg-theme-border rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                        </label>
-                      </div>
-                    )}
+                  
 
                     <div>
                       <label className={formLabelClass}>Your Message</label>
                       <textarea name="message" value={formData.message} onChange={handleChange} rows={5} placeholder="Write your message here..." className={formInputClass} required></textarea>
                     </div>
 
+                    {/* Error Feedback */}
                     {error && (
-                      <div className="p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
+                      <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl">
                         <p className="text-red-600 dark:text-red-400 text-sm font-medium">
-                          {error.response?.data?.message || "Connection error. Please try again later."}
+                          {error.response?.data?.message || "There was an error sending your message. Please try again."}
                         </p>
                       </div>
                     )}
@@ -188,14 +171,22 @@ const ContactPage = () => {
                     <button 
                       type="submit" 
                       disabled={isPending} 
-                      className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {isPending ? "Sending..." : "Submit Inquiry"}
+                      {isPending ? (
+                        <>
+                          <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                          Sending...
+                        </>
+                      ) : (
+                        "Submit Inquiry"
+                      )}
                     </button>
                   </form>
                 </>
               ) : (
-                <div className="text-center py-12">
+                /* Success State */
+                <div className="text-center py-12 animate-in zoom-in duration-300">
                   <div className="bg-green-100 dark:bg-green-900/30 text-green-600 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
                     <Check size={48} strokeWidth={3} />
                   </div>
