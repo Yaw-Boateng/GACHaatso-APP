@@ -1,19 +1,19 @@
 import axios from "axios";
 
-// Baseline fallback server domain origin
-const DEFAULT_SERVER_URL = "http://localhost:8080";
+// Baseline fallback server domain origins
+const DEFAULT_API_URL = "https://gachaatso-backend.onrender.com/api/v1";
+const DEFAULT_SERVER_URL = "https://gachaatso-backend.onrender.com";
 
-// Safely extract the root domain (e.g., http://localhost:8080 or https://xyz.ngrok-free.app)
+// Safely extract the root domain for images/assets
 export const IMAGE_BASE_URL = import.meta.env.VITE_API_BASE_URL 
   ? new URL(import.meta.env.VITE_API_BASE_URL).origin 
   : DEFAULT_SERVER_URL;
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || `${DEFAULT_SERVER_URL}/api/v1`,
+  // If VITE_API_BASE_URL is 'https://gachaatso-backend.onrender.com/api/v1'
+  baseURL: import.meta.env.VITE_API_BASE_URL || DEFAULT_API_URL,
   headers: {
     "Content-Type": "application/json",
-    "Accept": "application/json", // Tells Ngrok/Backend to skip serving HTML wrappers
-    "ngrok-skip-browser-warning": "true", // Skips ngrok interstitial page
   },
 });
 

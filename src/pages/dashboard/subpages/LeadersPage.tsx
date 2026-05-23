@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
+// Import your custom configured axios instance instead of the raw library
 import { 
   CheckCircle, Clock, Search, XCircle, Loader2, 
   AlertTriangle, Trash2 
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+import api from '../../../api/api';
 
 const LeadersPage = () => {
-  const { user } = useAuth(); // Get user directly from context
+  const { user } = useAuth(); 
   const [activeTab, setActiveTab] = useState('pending');
   const [leaders, setLeaders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,13 +19,6 @@ const LeadersPage = () => {
   const [selectedLeader, setSelectedLeader] = useState(null);
   const [processingId, setProcessingId] = useState(null);
 
-  // Memoize headers to prevent unnecessary re-renders of child components
-  const headers = useMemo(() => ({
-    'ngrok-skip-browser-warning': 'true',
-    'Accept': 'application/json',
-    'Authorization': `Bearer ${user?.token}`
-  }), [user?.token]);
-
   const fetchLeaders = useCallback(async (showLoader = true) => {
     if (!user?.token) return;
 
@@ -34,13 +26,14 @@ const LeadersPage = () => {
     setError(null);
 
     try {
+      // Your custom 'api' instance handles the base URL prefix. 
+      // Ensure your backend endpoints match your routing hierarchy.
       const endpoint = activeTab === 'pending' 
-        ? `${API_BASE}/admin/pending-leaders` 
-        : `${API_BASE}/admin/approved-leaders`;
+        ? '/admin/pending-leaders' 
+        : '/admin/approved-leaders';
       
-      const response = await axios.get(endpoint, {
-        params: { page: 0, size: 1000 },
-        headers
+      const response = await api.get(endpoint, {
+        params: { page: 0, size: 1000 }
       });
 
       if (response.data.success) {
@@ -54,11 +47,10 @@ const LeadersPage = () => {
       setError("Failed to sync with leadership records.");
       console.error("Fetch Error:", err);
     } finally {
-      setLoading(false);
+      loading && setLoading(false);
     }
-  }, [activeTab, headers, user?.token]);
+  }, [activeTab, user?.token]);
 
-  // Combined Effect: Only triggers when activeTab changes
   useEffect(() => {
     fetchLeaders();
   }, [fetchLeaders]);
@@ -66,14 +58,14 @@ const LeadersPage = () => {
   const handleAction = async (id, action) => {
     setProcessingId(id);
     try {
-      const url = `${API_BASE}/api/v1/admin/${action}/${id}`;
-      await axios.patch(url, {}, { headers });
+      // Using cleaner endpoints since 'api' handles default base prefixes
+      const url = `/admin/${action}/${id}`;
+      await api.patch(url, {});
       
-      // Optimistic Update: Remove from current list immediately
       setLeaders(prev => prev.filter(l => l.id !== id));
     } catch (err) {
       alert(err.response?.data?.message || `${action} failed`);
-      fetchLeaders(false); // Re-sync on error
+      fetchLeaders(false); 
     } finally {
       setProcessingId(null);
     }
@@ -87,7 +79,7 @@ const LeadersPage = () => {
     setProcessingId(idToDelete);
 
     try {
-      const response = await axios.delete(`${API_BASE}/api/v1/admin/delete/${idToDelete}`, { headers });
+      const response = await api.delete(`/admin/delete/${idToDelete}`);
       if (response.data.success) {
         setLeaders(prev => prev.filter(leader => leader.id !== idToDelete));
       }
@@ -146,7 +138,7 @@ const LeadersPage = () => {
             <button 
               key={tab}
               onClick={() => {
-                setLeaders([]); // Clear list so user sees fresh loading state
+                setLeaders([]); 
                 setActiveTab(tab);
               }}
               className={`flex items-center gap-2 px-6 py-2 rounded-xl font-semibold transition-all capitalize ${
