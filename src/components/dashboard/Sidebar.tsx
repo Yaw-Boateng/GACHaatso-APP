@@ -231,7 +231,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       <aside className="w-64 hidden lg:flex flex-col h-screen sticky top-0 border-r border-neutral-200/60 dark:border-neutral-800/60 bg-white dark:bg-[#0d0e16] transition-colors duration-300 shrink-0">
         <Link to="/" className="p-6 block group">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-neutral-900 dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-neutral-900 shadow-xs transition-transform duration-200 group-hover:scale-102">
+            <div className="w-9 h-9 bg-primary-600 dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-neutral-900 shadow-xs transition-transform duration-200 group-hover:scale-102">
               <span className="font-bold text-lg tracking-tighter">G</span>
             </div>
             <span className="text-base font-bold tracking-tight text-neutral-900 dark:text-neutral-100">

@@ -13,7 +13,6 @@ import {
 import { format, parseISO, isFuture, isPast } from "date-fns";
 import api from "../../../api/api";
 import { ProtectedImage } from "../../../api/ProtectedImage";
-// Import your protected image wrapper component
 
 const categories = [
   "All",
@@ -39,7 +38,9 @@ const EventsPage = () => {
   // Local Filtering and Layout State
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [timeFilter, setTimeFilter] = useState("upcoming");
+  
+  // Changed default state to "all" so everything shows instantly on load
+  const [timeFilter, setTimeFilter] = useState("all");
 
   // API Integration States
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -66,7 +67,11 @@ const EventsPage = () => {
         const result = response.data;
 
         if (result && typeof result === "object") {
-          if ("data" in result && result.data?.content) {
+          // Explicit mapping matching your payload structure: result.data.content & result.data.totalPages
+          if (result.success && result.data && result.data.content) {
+            setEvents(result.data.content);
+            setTotalPages(result.data.totalPages || 0);
+          } else if ("data" in result && result.data?.content) {
             setEvents(result.data.content);
             setTotalPages(result.data.totalPages || 0);
           } else if ("content" in result && Array.isArray(result.content)) {
@@ -77,7 +82,7 @@ const EventsPage = () => {
             setTotalPages(1);
           } else {
             throw new Error(
-              "Unexpected payload structure received from backend.",
+              "Unexpected payload structure received from backend."
             );
           }
         } else {
@@ -86,7 +91,7 @@ const EventsPage = () => {
       } catch (err: any) {
         const serverErrorMessage = err.response?.data?.message || err.message;
         setError(
-          serverErrorMessage || "An unexpected networking issue occurred.",
+          serverErrorMessage || "An unexpected networking issue occurred."
         );
       } finally {
         setLoading(false);
@@ -101,7 +106,8 @@ const EventsPage = () => {
     const eventDateText = event.date || new Date().toISOString();
     let eventDate: Date;
     try {
-      eventDate = parseISO(eventDateText);
+      // Replaces whitespace separator with 'T' for clean browser standard date compatibility
+      eventDate = parseISO(eventDateText.replace(" ", "T")); 
     } catch (e) {
       eventDate = new Date();
     }
@@ -129,13 +135,14 @@ const EventsPage = () => {
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     const dateA = parseISO(a.date || "").getTime();
     const dateB = parseISO(b.date || "").getTime();
+    // Keeps historical list intuitive by ordering closest items up front
     return timeFilter === "past" ? dateB - dateA : dateA - dateB;
   });
 
   return (
     <div className="min-h-screen pt-16 bg-neutral-50 dark:bg-[#090a0f] text-neutral-900 dark:text-neutral-100 antialiased transition-colors duration-300">
       {/* Background Styled Hero Unit Header */}
-      <section className="relative py-20 bg-neutral-900 text-white overflow-hidden">
+      <section className="relative py-20 bg-primary-900 dark:bg-neutral-900 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neutral-800/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
         </div>
@@ -145,7 +152,7 @@ const EventsPage = () => {
             <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 tracking-tight text-neutral-300 hover:text-white">
               Events &amp; Gatherings
             </h1>
-            <p className="text-lg md:text-xl text-neutral-400 font-sans leading-relaxed">
+            <p className="text-lg md:text-xl text-white dark:text-neutral-400 font-sans leading-relaxed">
               Discover opportunities to connect, learn, and collaborate with our
               local community members.
             </p>
@@ -171,7 +178,7 @@ const EventsPage = () => {
 
             {/* Time Frame Segments */}
             <div className="flex rounded-lg bg-neutral-100 dark:bg-neutral-900 p-1 self-start md:self-auto">
-              {["upcoming", "past", "all"].map((filter) => (
+              {["all", "upcoming", "past"].map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setTimeFilter(filter)}
@@ -229,7 +236,7 @@ const EventsPage = () => {
             </button>
           </div>
         ) : sortedEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-white dark:bg-[#0d0e16]">
+          <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-white dark:bg-[#0d0e16] p-6">
             <div className="mb-4 rounded-full bg-neutral-100 dark:bg-neutral-900 p-4 text-neutral-400">
               <Filter className="h-6 w-6" />
             </div>
@@ -237,7 +244,7 @@ const EventsPage = () => {
               No events fit your criteria
             </h3>
             <p className="mt-1 text-xs text-neutral-400">
-              Try loosening your keywords or shifting timeframe criteria tags.
+              Try changing your active search parameters or shifting category tabs.
             </p>
             <button
               onClick={() => {
@@ -256,12 +263,12 @@ const EventsPage = () => {
               {sortedEvents.map((event) => {
                 let parsedDate = new Date();
                 try {
-                  if (event.date) parsedDate = parseISO(event.date);
+                  if (event.date) parsedDate = parseISO(event.date.replace(" ", "T"));
                 } catch (e) {}
 
-                // If event.imageUrl is empty, fallback to placeholder asset route 
-                // protected endpoint directly handles standard API relative routes now.
-                const targetSrc = event.imageUrl || "/photos/1448709/pexels-photo-1448709.jpeg";
+                // Cleans out leading/trailing whitespaces safely
+                const cleanedImgString = event.imageUrl ? event.imageUrl.trim() : "";
+                const targetSrc = cleanedImgString || "/photos/1448709/pexels-photo-1448709.jpeg";
 
                 return (
                   <article

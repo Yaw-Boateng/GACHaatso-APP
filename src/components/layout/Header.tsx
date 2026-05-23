@@ -86,7 +86,7 @@ const Header = () => {
 
         {/* Desktop Nav Links */}
         <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-          {["Home", "About", "Sermons", "Events", "Giving", "Contact"].map(
+          {["Home", "About", "Sermons", "Events", "Contact"].map(
             (item) => (
               <NavLink
                 key={item}

@@ -60,11 +60,22 @@ const EventsDashboard: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Helper utility to attach the domain origin mapping prefix onto assets 
-  const getFullImageUrl = (url?: string) => {
-    if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return `${IMAGE_BASE_URL}${url}`;
-  };
+  // Helper utility to attach the domain origin mapping prefix onto assets 
+const getFullImageUrl = (url?: string) => {
+  if (!url) return '';
+  
+  // Clean up any stray whitespaces from the backend response string
+  const cleanUrl = url.trim();
+  
+  // If it's already an absolute URL, return it as-is
+  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+    return cleanUrl;
+  }
+  
+  // Return the relative block cleanly. 
+  // If your server serves uploads outside of /api/v1, we use an absolute fallback paths sequence.
+  return cleanUrl.startsWith('/') ? cleanUrl : `/${cleanUrl}`;
+};
 
   // Fetch paginated events -> GET /api/v1/event
   const fetchEvents = async (page: number) => {

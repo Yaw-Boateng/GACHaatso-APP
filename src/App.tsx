@@ -14,12 +14,12 @@ import AddMemberPage from "./pages/dashboard/subpages/AddMemberPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute"; // Import here
 import ForgotPasswordPage from "./pages/dashboard/subpages/ForgotPasswordPage";
 import EventDetailPage from "./pages/dashboard/subpages/EventDetailPage";
+import MemberFormPage from "./pages/dashboard/subpages/MemberFormPage";
 
 // --- LAZY LOADED PAGES ---
 const HomePage = lazy(() => import("./pages/HomePage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const SermonsPage = lazy(() => import("./pages/SermonsPage"));
-const GivingPage = lazy(() => import("./pages/GivingPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
@@ -58,7 +58,6 @@ function App() {
               <Route path="sermons" element={<SermonsPage />} />
               <Route path="events" element={<EventsPage />} />
               <Route path="/events/:eventId" element={<EventDetailPage />} />
-              <Route path="giving" element={<GivingPage />} />
               <Route path="contact" element={<ContactPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
@@ -86,6 +85,8 @@ function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="eventsdb" element={<EventsDashboard />} />
               <Route path="settings" element={<SettingsPage />} />
+              {/* <Route path="/dashboard/members/add" element={<MemberFormPage />} /> */}
+              <Route path="members/edit/:id" element={<MemberFormPage />} />
             </Route>
           </Routes>
         </Suspense>

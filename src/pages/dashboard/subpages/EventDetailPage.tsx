@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, Clock, MapPin, ArrowLeft, Loader2 } from "lucide-react";
+import { Calendar, Clock, MapPin, ArrowLeft, Loader2, X, Maximize2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import api, { IMAGE_BASE_URL } from "../../../api/api";
+import api from "../../../api/api";
+import { ProtectedImage } from "../../../api/ProtectedImage";
 
 interface EventDetail {
   id: string;
@@ -19,6 +20,9 @@ const EventDetailPage = () => {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // State to control full image view modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchEventById = async () => {
@@ -44,6 +48,24 @@ const EventDetailPage = () => {
       fetchEventById();
     }
   }, [eventId]);
+
+  // Accessibility shortcut: close modal with Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsModalOpen(false);
+    };
+
+    if (isModalOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      // Optional: Prevent background scrolling when modal is open
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [isModalOpen]);
 
   if (loading) {
     return (
@@ -71,9 +93,7 @@ const EventDetailPage = () => {
     if (event.date) parsedDate = parseISO(event.date);
   } catch (e) {}
 
-  const resolvedImgSrc = event.imageUrl
-    ? `${IMAGE_BASE_URL.replace(/\/$/, "")}/${event.imageUrl.replace(/^\//, "")}`
-    : "https://images.pexels.com/photos/1448709/pexels-photo-1448709.jpeg";
+  const cleanImageSrc = event.imageUrl ? event.imageUrl.trim() : "";
 
   return (
     <div className="min-h-screen pt-24 pb-12 bg-neutral-50 dark:bg-[#090a0f] text-neutral-900 dark:text-neutral-100 antialiased">
@@ -84,16 +104,22 @@ const EventDetailPage = () => {
           <span>Back to catalog listing</span>
         </Link>
 
-        {/* Hero Display Element */}
-        <div className="relative h-64 md:h-96 rounded-2xl overflow-hidden mb-8 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60">
-          <img 
-            src={resolvedImgSrc} 
+        {/* Hero Display Element with Click-to-Expand Capability */}
+        <div 
+          onClick={() => setIsModalOpen(true)}
+          className="group relative h-64 md:h-96 rounded-2xl overflow-hidden mb-8 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 cursor-zoom-in"
+        >
+          <ProtectedImage 
+            src={cleanImageSrc} 
             alt={event.title} 
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "https://images.pexels.com/photos/1448709/pexels-photo-1448709.jpeg";
-            }}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
           />
+          {/* Subtle Hover Overlay indicating it can expand */}
+          <div className="absolute inset-0 bg-neutral-950/0 group-hover:bg-neutral-950/20 flex items-center justify-center transition-colors duration-300">
+            <div className="bg-neutral-900/80 text-white p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-md shadow-md">
+              <Maximize2 className="h-4 w-4" />
+            </div>
+          </div>
         </div>
 
         {/* Informative Grid Area layout */}
@@ -141,6 +167,35 @@ const EventDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Full-Screen Image Lightbox Modal Overlay */}
+      {isModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/95 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setIsModalOpen(false)}
+        >
+          {/* Close Trigger Button */}
+          <button 
+            onClick={() => setIsModalOpen(false)}
+            className="absolute top-6 right-6 p-2 rounded-full bg-neutral-900 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Close modal view"
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          {/* Core Image container wrapping your component */}
+          <div 
+            className="relative max-w-5xl max-h-[85vh] w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()} // Keeps clicking the graphic from shutting the window
+          >
+            <ProtectedImage 
+              src={cleanImageSrc} 
+              alt={event.title} 
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

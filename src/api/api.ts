@@ -24,9 +24,12 @@ api.interceptors.request.use(
       
       if (savedUserStr) {
         const userData = JSON.parse(savedUserStr);
-        const token = userData?.token;
+        let token = userData?.token;
         
         if (token) {
+          // SANITIZE: Strip out accidental newlines, carriage returns, tabs, or trailing whitespace
+          // to protect Spring Security/Tomcat filter chains from throwing a 500 parsing error.
+          token = token.replace(/[\r\n\t]/g, "").trim();
           config.headers.Authorization = `Bearer ${token}`;
         }
       }
