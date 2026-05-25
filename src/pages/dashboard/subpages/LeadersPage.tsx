@@ -1,71 +1,41 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-// Import your custom configured axios instance instead of the raw library
+import React, { useState, useMemo } from 'react';
 import { 
-  CheckCircle, Clock, Search, XCircle, Loader2, 
+  CheckCircle, Clock, Search, Loader2, 
   AlertTriangle, Trash2 
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
-import api from '../../../api/api';
+import { useLeaders } from '../../../hooks/useLeaders'; 
 
 const LeadersPage = () => {
   const { user } = useAuth(); 
   const [activeTab, setActiveTab] = useState('pending');
-  const [leaders, setLeaders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [error, setError] = useState(null);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLeader, setSelectedLeader] = useState(null);
   const [processingId, setProcessingId] = useState(null);
 
-  const fetchLeaders = useCallback(async (showLoader = true) => {
-    if (!user?.token) return;
+  // Safely formulate headers payload for React Query 
+  const headers = useMemo(() => ({
+    Authorization: user?.token ? `Bearer ${user.token}` : ''
+  }), [user?.token]);
 
-    if (showLoader) setLoading(true);
-    setError(null);
-
-    try {
-      // Your custom 'api' instance handles the base URL prefix. 
-      // Ensure your backend endpoints match your routing hierarchy.
-      const endpoint = activeTab === 'pending' 
-        ? '/admin/pending-leaders' 
-        : '/admin/approved-leaders';
-      
-      const response = await api.get(endpoint, {
-        params: { page: 0, size: 1000 }
-      });
-
-      if (response.data.success) {
-        const transformedContent = (response.data.data.content || []).map(item => ({
-          ...item,
-          fullName: `${item.firstName || ''} ${item.lastName || ''}`.trim() || 'Unknown Leader'
-        }));
-        setLeaders(transformedContent);
-      }
-    } catch (err) {
-      setError("Failed to sync with leadership records.");
-      console.error("Fetch Error:", err);
-    } finally {
-      loading && setLoading(false);
-    }
-  }, [activeTab, user?.token]);
-
-  useEffect(() => {
-    fetchLeaders();
-  }, [fetchLeaders]);
+  // Hooking the layout directly into TanStack Query cache instances
+  const { 
+    leaders, 
+    isLoading, 
+    isError, 
+    executeAction, 
+    executeDelete,
+    isProcessing 
+  } = useLeaders(activeTab, headers);
 
   const handleAction = async (id, action) => {
     setProcessingId(id);
     try {
-      // Using cleaner endpoints since 'api' handles default base prefixes
-      const url = `/admin/${action}/${id}`;
-      await api.patch(url, {});
-      
-      setLeaders(prev => prev.filter(l => l.id !== id));
+      await executeAction({ id, action });
     } catch (err) {
       alert(err.response?.data?.message || `${action} failed`);
-      fetchLeaders(false); 
     } finally {
       setProcessingId(null);
     }
@@ -79,13 +49,9 @@ const LeadersPage = () => {
     setProcessingId(idToDelete);
 
     try {
-      const response = await api.delete(`/admin/delete/${idToDelete}`);
-      if (response.data.success) {
-        setLeaders(prev => prev.filter(leader => leader.id !== idToDelete));
-      }
+      await executeDelete(idToDelete);
     } catch (err) {
       alert(`Error: ${err.response?.data?.message || "Delete failed"}`);
-      fetchLeaders(false);
     } finally {
       setSelectedLeader(null);
       setProcessingId(null);
@@ -115,10 +81,16 @@ const LeadersPage = () => {
               Are you sure you want to delete <span className="font-bold text-theme-text">{selectedLeader?.fullName}</span>?
             </p>
             <div className="flex gap-3">
-              <button onClick={() => { setIsModalOpen(false); setSelectedLeader(null); }} className="flex-1 px-6 py-3 rounded-xl font-bold bg-theme-base border border-theme-border">
+              <button 
+                onClick={() => { setIsModalOpen(false); setSelectedLeader(null); }} 
+                className="flex-1 px-6 py-3 rounded-xl font-bold bg-theme-base border border-theme-border"
+              >
                 Cancel
               </button>
-              <button onClick={confirmDelete} className="flex-1 px-6 py-3 rounded-xl font-bold bg-red-500 text-white hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20">
+              <button 
+                onClick={confirmDelete} 
+                className="flex-1 px-6 py-3 rounded-xl font-bold bg-red-500 text-white hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+              >
                 Delete
               </button>
             </div>
@@ -137,10 +109,7 @@ const LeadersPage = () => {
           {['pending', 'approved'].map((tab) => (
             <button 
               key={tab}
-              onClick={() => {
-                setLeaders([]); 
-                setActiveTab(tab);
-              }}
+              onClick={() => setActiveTab(tab)}
               className={`flex items-center gap-2 px-6 py-2 rounded-xl font-semibold transition-all capitalize ${
                 activeTab === tab 
                 ? (tab === 'pending' ? 'bg-primary-600 text-white shadow-lg' : 'bg-emerald-500 text-white shadow-lg') 
@@ -153,10 +122,10 @@ const LeadersPage = () => {
         </div>
       </div>
 
-      {error && (
+      {isError && (
         <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500">
           <AlertTriangle size={20} />
-          <p className="font-medium">{error}</p>
+          <p className="font-medium">Failed to sync with leadership records.</p>
         </div>
       )}
 
@@ -177,7 +146,7 @@ const LeadersPage = () => {
       </div>
 
       <div className="bg-theme-surface border border-theme-border rounded-3xl overflow-hidden shadow-sm min-h-[400px]">
-        {loading ? (
+        {isLoading ? (
           <div className="h-[400px] flex flex-col items-center justify-center gap-3">
             <Loader2 className="animate-spin text-primary-600" size={40} />
             <p className="text-sm font-medium text-theme-muted">Fetching {activeTab} leaders...</p>
@@ -213,7 +182,7 @@ const LeadersPage = () => {
                           ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' 
                           : 'bg-amber-500/10 border-amber-500/20 text-amber-500'
                         }`}>
-                          {leader.approvalStatus}
+                          {leader.approvalStatus || (activeTab === 'approved' ? 'APPROVED' : 'PENDING')}
                         </span>
                       </td>
                       <td className="px-6 py-5 text-right">
@@ -221,14 +190,14 @@ const LeadersPage = () => {
                           {activeTab === 'pending' ? (
                             <>
                               <button 
-                                disabled={processingId === leader.id}
+                                disabled={processingId === leader.id || isProcessing}
                                 onClick={() => handleAction(leader.id, 'approve')} 
                                 className="min-w-[100px] flex items-center justify-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg text-sm font-bold hover:bg-emerald-500 hover:text-white disabled:opacity-50 transition-all"
                               >
                                 {processingId === leader.id ? <Loader2 size={14} className="animate-spin" /> : "Approve"}
                               </button>
                               <button 
-                                disabled={processingId === leader.id}
+                                disabled={processingId === leader.id || isProcessing}
                                 onClick={() => handleAction(leader.id, 'reject')} 
                                 className="min-w-[100px] flex items-center justify-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg text-sm font-bold hover:bg-red-500 hover:text-white disabled:opacity-50 transition-all"
                               >
@@ -237,7 +206,7 @@ const LeadersPage = () => {
                             </>
                           ) : (
                             <button 
-                              disabled={processingId === leader.id}
+                              disabled={processingId === leader.id || isProcessing}
                               onClick={() => { setSelectedLeader(leader); setIsModalOpen(true); }}
                               className="px-4 py-1.5 bg-red-500/5 text-red-500 border border-red-500/20 rounded-lg text-sm font-bold hover:bg-red-600 hover:text-white flex items-center gap-2 transition-all"
                             >

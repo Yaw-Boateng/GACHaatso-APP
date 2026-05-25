@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+// Ensure this environment variable matches your configured base API paths precisely
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://gachaatso-backend.onrender.com";
 
 export const useLeaders = (activeTab, headers) => {
   const queryClient = useQueryClient();
@@ -10,42 +11,46 @@ export const useLeaders = (activeTab, headers) => {
   const leadersQuery = useQuery({
     queryKey: ['leaders', activeTab],
     queryFn: async () => {
+      // Normalizing path suffixes based on global environment patterns
+      const basePath = API_BASE.endsWith('/api/v1') ? API_BASE : `${API_BASE}/api/v1`;
       const endpoint = activeTab === 'pending' 
-        ? `${API_BASE}/api/v1/admin/pending-leaders` 
-        : `${API_BASE}/api/v1/admin/approved-leaders`;
+        ? `${basePath}/admin/pending-leaders` 
+        : `${basePath}/admin/approved-leaders`;
       
       const response = await axios.get(endpoint, {
         params: { page: 0, size: 1000 },
         headers
       });
 
-      return (response.data.data.content || []).map(item => ({
+      return (response.data?.data?.content || response.data?.content || []).map(item => ({
         ...item,
         fullName: `${item.firstName || ''} ${item.lastName || ''}`.trim() || 'Unknown Leader'
       }));
     },
-    enabled: !!headers.Authorization, // Only fetch if token exists
+    enabled: !!headers.Authorization, // Explicitly safe baseline checks
   });
 
   // Action Mutation (Approve/Reject)
   const actionMutation = useMutation({
     mutationFn: async ({ id, action }) => {
-      const url = `${API_BASE}/api/v1/admin/${action}/${id}`;
+      const basePath = API_BASE.endsWith('/api/v1') ? API_BASE : `${API_BASE}/api/v1`;
+      const url = `${basePath}/admin/${action}/${id}`;
       return await axios.patch(url, {}, { headers });
     },
     onSuccess: () => {
-      // This is the magic: it forces both lists to refresh immediately
-      queryClient.invalidateQueries(['leaders']);
+      // Invalidate the absolute root key to refresh both lists concurrently
+      queryClient.invalidateQueries({ queryKey: ['leaders'] });
     },
   });
 
   // Delete Mutation
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      return await axios.delete(`${API_BASE}/api/v1/admin/delete/${id}`, { headers });
+      const basePath = API_BASE.endsWith('/api/v1') ? API_BASE : `${API_BASE}/api/v1`;
+      return await axios.delete(`${basePath}/admin/delete/${id}`, { headers });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['leaders']);
+      queryClient.invalidateQueries({ queryKey: ['leaders'] });
     },
   });
 
