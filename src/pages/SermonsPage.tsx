@@ -100,7 +100,7 @@ const SermonsPage = () => {
       </section>
 
       {/* Control Bar (Search & Filter) */}
-      <section className="sticky top-20 z-40 bg-theme-bg/80 backdrop-blur-md border-b border-theme-border py-6">
+      <section className="sticky top-20 z-10 bg-theme-bg/80 backdrop-blur-md border-b border-theme-border py-6">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
             {/* Search Input */}

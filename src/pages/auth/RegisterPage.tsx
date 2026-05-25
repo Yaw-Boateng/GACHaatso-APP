@@ -22,7 +22,7 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPendingApproval, setIsPendingApproval] = useState(false);
   
-  const { signUp } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   // Password Validation Logic
@@ -64,7 +64,7 @@ const RegisterPage = () => {
         role: formData.role
       };
 
-      await signUp(apiPayload);
+      await register(apiPayload);
       
       if (formData.role === 'LEADER') {
         setIsPendingApproval(true);

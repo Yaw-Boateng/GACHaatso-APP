@@ -161,7 +161,7 @@ const EventsPage = () => {
       </section>
 
       {/* Persistent Navigation Controls Bar */}
-      <section className="sticky top-0 z-40 border-b border-neutral-200/80 dark:border-neutral-800/80 bg-white/80 dark:bg-[#0d0e16]/80 backdrop-blur-md transition-colors">
+      <section className="sticky top-0 z-10 border-b border-neutral-200/80 dark:border-neutral-800/80 bg-white/80 dark:bg-[#0d0e16]/80 backdrop-blur-md transition-colors">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Minimal Search Input */}
