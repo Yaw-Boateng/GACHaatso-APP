@@ -10,9 +10,9 @@ import {
   LogOut,
   Settings,
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
-import Logo from "../ui/Logo";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
+import Logo from "../common/Logo";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -94,7 +94,7 @@ const Header = () => {
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            {["Home", "About", "Sermons", "Events", "Giving", "Contact"].map(
+            {["Home", "About", "Sermons", "Events", "Contact"].map(
               (item) => (
                 <NavLink
                   key={item}

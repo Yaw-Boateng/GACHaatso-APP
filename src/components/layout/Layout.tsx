@@ -1,13 +1,26 @@
-import { Outlet } from 'react-router-dom';
+﻿import React, { Suspense } from 'react';
+import { Outlet } from 'react-router-dom';import Footer from './Footer';
+import { ScrollToTop } from '../utils/ScrollToTop';
 import Header from './Header';
-import Footer from './Footer';
+import LoadingSpinner from '../common/LoadingSpinner';
 
-const Layout = () => {
+const Layout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-theme-bg text-theme-text">
+      <ScrollToTop />
+      
       <Header />
+
       <main className="flex-grow">
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="py-20 flex items-center justify-center">
+              <LoadingSpinner size={32} />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
     </div>
