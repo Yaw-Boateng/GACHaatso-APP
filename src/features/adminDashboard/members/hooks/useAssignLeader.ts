@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../../services/apiClient';
 
-export interface AssignLeaderPayload {
+interface AssignLeaderPayload {
   memberId: string;
   leaderId: string;
 }
@@ -14,30 +14,15 @@ export const useAssignLeader = () => {
       const response = await apiClient.patch(
         `/admin/members/${memberId}/assign/${leaderId}`
       );
-      return response.data;
+      return response.data; // Assumes response returns updated member or standard payload
     },
-    onSuccess: (_, variables) => {
-      // Invalidate query families matching keys with exact: false
-      queryClient.invalidateQueries({
-        queryKey: ['members'],
-        exact: false,
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['unassignedMembers'],
-        exact: false,
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['leaderMembers'],
-        exact: false,
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['approvedLeaders'],
-        exact: false,
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['member', variables.memberId],
-        exact: false,
-      });
+    onSuccess: async () => {
+      // Force an immediate refetch of all active queries starting with 'members'
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['members'], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['unassignedMembers'], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['leaderMembers'], type: 'active' }),
+      ]);
     },
   });
 };

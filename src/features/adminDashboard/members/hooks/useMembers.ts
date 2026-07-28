@@ -20,43 +20,45 @@ export const useMembers = (initialParams: MemberFilterParams = { page: 1, limit:
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['members', params],
     queryFn: () => membersApi.getMembers(apiParams),
-    // Fix in useMembers.ts
-select: (res) => {
-  // Handle optional wrapper objects (e.g. res.data.data vs res.data)
-  const pageData = res.data?.content ? res.data : res.data?.data || res.data || {};
-  
-  return {
-    members: (pageData.content || (Array.isArray(pageData) ? pageData : [])) as Member[],
-    pagination: {
-      total: pageData.totalElements ?? 0,
-      page: (pageData.number ?? 0) + 1,
-      limit: pageData.size ?? 10,
-      totalPages: pageData.totalPages ?? 1,
+    select: (res) => {
+      const pageData = res.data?.content ? res.data : res.data?.data || res.data || {};
+      
+      return {
+        members: (pageData.content || (Array.isArray(pageData) ? pageData : [])) as Member[],
+        pagination: {
+          total: pageData.totalElements ?? 0,
+          page: (pageData.number ?? 0) + 1,
+          limit: pageData.size ?? 10,
+          totalPages: pageData.totalPages ?? 1,
+        },
+      };
     },
-  };
-},
   });
 
-  // Reusable helper for local CRUD mutations
+  // Reusable helper for invalidating members and triggering active refetch
   const invalidateMembers = () => {
-    queryClient.invalidateQueries({ queryKey: ['members'], exact: false });
+    return queryClient.invalidateQueries({ 
+      queryKey: ['members'], 
+      exact: false,
+      refetchType: 'active'
+    });
   };
 
   const createMutation = useMutation({
     mutationFn: ({ data, file }: { data: Partial<Member>; file?: File | null }) =>
       membersApi.createMember(data, file),
-    onSuccess: invalidateMembers,
+    onSuccess: () => invalidateMembers(),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data, file }: { id: string; data: Partial<Member>; file?: File | null }) =>
       membersApi.updateMember(id, data, file),
-    onSuccess: invalidateMembers,
+    onSuccess: () => invalidateMembers(),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => membersApi.deleteMember(id),
-    onSuccess: invalidateMembers,
+    onSuccess: () => invalidateMembers(),
   });
 
   return {

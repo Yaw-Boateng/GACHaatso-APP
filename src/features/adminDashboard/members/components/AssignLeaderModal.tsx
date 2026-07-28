@@ -19,25 +19,20 @@ export const AssignLeaderModal: React.FC<AssignLeaderModalProps> = ({
 }) => {
   const [selectedLeaderId, setSelectedLeaderId] = useState<string>('');
 
-  // 1. Get approved leaders list
   const { data: approvedLeaders = [], isLoading: isLoadingLeaders } =
     useApprovedLeaders();
 
-  // 2. Mutation hook to send request
   const assignLeaderMutation = useAssignLeader();
 
-  // Pre-select current leader if member already has one assigned
   useEffect(() => {
     if (member && isOpen) {
+      const memberData = member as Record<string, any>;
       const currentLeader =
-        member.leader ||
-        (member as any)?.assignedLeader ||
-        (member as any)?.leaderInfo;
-      if (currentLeader?.id) {
-        setSelectedLeaderId(currentLeader.id);
-      } else {
-        setSelectedLeaderId('');
-      }
+        member.leader || memberData.assignedLeader || memberData.leaderInfo;
+      
+      setSelectedLeaderId(currentLeader?.id || '');
+    } else {
+      setSelectedLeaderId('');
     }
   }, [member, isOpen]);
 
@@ -45,7 +40,7 @@ export const AssignLeaderModal: React.FC<AssignLeaderModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLeaderId) return;
+    if (!selectedLeaderId || assignLeaderMutation.isPending) return;
 
     try {
       await assignLeaderMutation.mutateAsync({
@@ -53,20 +48,19 @@ export const AssignLeaderModal: React.FC<AssignLeaderModalProps> = ({
         leaderId: selectedLeaderId,
       });
 
-      // Execute refetch callback to refresh the table data immediately
       if (onSuccess) {
         await onSuccess();
       }
+
       onClose();
     } catch (error) {
       console.error('Failed to assign leader:', error);
     }
   };
 
+  const memberData = member as Record<string, any>;
   const currentLeader =
-    member.leader ||
-    (member as any).assignedLeader ||
-    (member as any).leaderInfo;
+    member.leader || memberData.assignedLeader || memberData.leaderInfo;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">

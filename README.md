@@ -58,10 +58,20 @@ GACHaatso-APP
 │  │  │  │  │  ├─ adminApi.ts
 │  │  │  │  │  ├─ birthdaysApi.ts
 │  │  │  │  │  └─ notificationsApi.ts
+│  │  │  │  ├─ components
+│  │  │  │  │  ├─ BirthdayCard.tsx
+│  │  │  │  │  ├─ BirthdaysModal.tsx
+│  │  │  │  │  ├─ MetricCard.tsx
+│  │  │  │  │  └─ MissingAttendanceCard.tsx
+│  │  │  │  ├─ hooks
+│  │  │  │  │  ├─ useAdminMutations.ts
+│  │  │  │  │  └─ useAdminQueries.ts
 │  │  │  │  └─ pages
 │  │  │  │     ├─ AdminDashboard.tsx
+│  │  │  │     ├─ AdminLeaderDashboard.tsx
 │  │  │  │     ├─ AdminMemberDashboard.tsx
 │  │  │  │     ├─ AdminSettingsPage.tsx
+│  │  │  │     ├─ BirthdaysPage.tsx
 │  │  │  │     ├─ Dashboard.tsx
 │  │  │  │     └─ PendingUsersPage.tsx
 │  │  │  ├─ events
@@ -92,6 +102,7 @@ GACHaatso-APP
 │  │  │  │  │  ├─ MembersTable.tsx
 │  │  │  │  │  └─ MembersToolbar.tsx
 │  │  │  │  ├─ hooks
+│  │  │  │  │  ├─ useAssignLeader.ts
 │  │  │  │  │  └─ useMembers.ts
 │  │  │  │  ├─ pages
 │  │  │  │  │  ├─ AddMemberPage.tsx
@@ -142,7 +153,6 @@ GACHaatso-APP
 │  │  │  ├─ index.ts
 │  │  │  └─ pages
 │  │  │     ├─ LeaderAttendancePage.tsx
-│  │  │     ├─ LeaderDashboard.tsx
 │  │  │     ├─ LeaderGroupPage.tsx
 │  │  │     ├─ LeaderResourcesPage.tsx
 │  │  │     └─ LeadersPage.tsx

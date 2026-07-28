@@ -5,9 +5,14 @@ import Sidebar from './Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
 
 const DashboardShell: React.FC = () => {
-  const { user } = useAuth(); 
-  // Adjust 'user?.role' to match your AuthContext user object structure
-  const role = user?.role || "MEMBER";
+ const { user } = useAuth(); 
+  
+  // Guard against non-string user.role objects or undefined values
+  const rawRole = typeof user?.role === 'string' 
+    ? user.role 
+    : user?.role?.name || "MEMBER";
+
+  const role = String(rawRole);
 
   return (
     <div className="flex min-h-screen bg-theme-bg text-theme-text transition-colors duration-300">

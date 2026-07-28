@@ -19,7 +19,10 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-class AsyncErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class AsyncErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   public state: ErrorBoundaryState = { hasError: false, error: null };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
@@ -31,9 +34,16 @@ class AsyncErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryStat
       return (
         <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center space-y-4">
           <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl max-w-md">
-            <h3 className="text-lg font-bold text-red-500 mb-1">Failed to load view</h3>
+            <h3 className="text-lg font-bold text-red-500 mb-1">
+              Failed to load view
+            </h3>
             <p className="text-xs text-theme-muted mb-4">
-              {this.state.error?.message || "There was a problem dynamically loading this page."}
+              {typeof this.state.error?.message === "string"
+                ? this.state.error.message
+                : String(
+                    this.state.error ||
+                      "There was a problem dynamically loading this page.",
+                  )}
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -52,27 +62,59 @@ class AsyncErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryStat
 // Lazy-loaded Public Pages
 const HomePage = lazy(() => import("../features/public/pages/HomePage"));
 const AboutPage = lazy(() => import("../features/public/pages/AboutPage"));
-const SermonsPage = lazy(() => import("../features/adminDashboard/sermons/pages/SermonsPage"));
-const EventsPage = lazy(() => import("../features/adminDashboard/events/pages/EventsPage"));
-const EventDetailPage = lazy(() => import("../features/adminDashboard/events/pages/EventDetailPage"));
+const SermonsPage = lazy(
+  () => import("../features/adminDashboard/sermons/pages/SermonsPage"),
+);
+const EventsPage = lazy(
+  () => import("../features/adminDashboard/events/pages/EventsPage"),
+);
+const EventDetailPage = lazy(
+  () => import("../features/adminDashboard/events/pages/EventDetailPage"),
+);
 const ContactPage = lazy(() => import("../features/public/pages/ContactPage"));
 const LoginPage = lazy(() => import("../features/auth/pages/LoginPage"));
 const RegisterPage = lazy(() => import("../features/auth/pages/RegisterPage"));
-const ForgotPasswordPage = lazy(() => import("../features/auth/pages/ForgotPasswordPage"));
-const ResetPasswordPage = lazy(() => import("../features/auth/pages/ResetPasswordPage"));
-const NotFoundPage = lazy(() => import("../features/public/pages/NotFoundPage"));
+const ForgotPasswordPage = lazy(
+  () => import("../features/auth/pages/ForgotPasswordPage"),
+);
+const ResetPasswordPage = lazy(
+  () => import("../features/auth/pages/ResetPasswordPage"),
+);
+const NotFoundPage = lazy(
+  () => import("../features/public/pages/NotFoundPage"),
+);
 
 // Lazy-loaded Dashboard Pages
-const AdminDashboard = lazy(() => import("../features/adminDashboard/admin/pages/AdminDashboard"));
-const EventsDashboard = lazy(() => import("../features/adminDashboard/events/pages/EventsDashboard"));
-const ResourcesPage = lazy(() => import("../features/leadersDashboard/pages/LeaderResourcesPage"));
-const GroupPage = lazy(() => import("../features/leadersDashboard/pages/LeaderGroupPage"));
-const MessagesPage = lazy(() => import("../features/adminDashboard/messages/pages/MessagesPage"));
-const SettingsPage = lazy(() => import("../features/adminDashboard/admin/pages/AdminSettingsPage"));
-const MembersPage = lazy(() => import("../features/adminDashboard/members/pages/MembersPage"));
-const AddMembersPage = lazy(() => import("../features/adminDashboard/members/pages/AddMemberPage"));
-const AttendancePage = lazy(() => import("../features/leadersDashboard/pages/LeaderAttendancePage"));
-const LeadersPage = lazy(() => import("../features/leadersDashboard/pages/LeadersPage"));
+const AdminDashboard = lazy(
+  () => import("../features/adminDashboard/admin/pages/AdminDashboard"),
+);
+const EventsDashboard = lazy(
+  () => import("../features/adminDashboard/events/pages/EventsDashboard"),
+);
+const ResourcesPage = lazy(
+  () => import("../features/leadersDashboard/pages/LeaderResourcesPage"),
+);
+const GroupPage = lazy(
+  () => import("../features/leadersDashboard/pages/LeaderGroupPage"),
+);
+const MessagesPage = lazy(
+  () => import("../features/adminDashboard/messages/pages/MessagesPage"),
+);
+const SettingsPage = lazy(
+  () => import("../features/adminDashboard/admin/pages/AdminSettingsPage"),
+);
+const MembersPage = lazy(
+  () => import("../features/adminDashboard/members/pages/MembersPage"),
+);
+const AddMembersPage = lazy(
+  () => import("../features/adminDashboard/members/pages/AddMemberPage"),
+);
+const AttendancePage = lazy(
+  () => import("../features/leadersDashboard/pages/LeaderAttendancePage"),
+);
+const LeadersPage = lazy(
+  () => import("../features/leadersDashboard/pages/LeadersPage"),
+);
 
 const PageLoader = () => (
   <div className="min-h-[50vh] flex items-center justify-center">
@@ -99,17 +141,94 @@ export const router = createBrowserRouter([
         /* PUBLIC & MEMBER ACCESSIBLE ROUTES */
         element: <Layout />,
         children: [
-          { index: true, element: <LazyLoad><HomePage /></LazyLoad> },
-          { path: "about", element: <LazyLoad><AboutPage /></LazyLoad> },
-          { path: "sermons", element: <LazyLoad><SermonsPage /></LazyLoad> },
-          { path: "events", element: <LazyLoad><EventsPage /></LazyLoad> },
-          { path: "events/:eventId", element: <LazyLoad><EventDetailPage /></LazyLoad> },
-          { path: "contact", element: <LazyLoad><ContactPage /></LazyLoad> },
-          { path: "login", element: <LazyLoad><LoginPage /></LazyLoad> },
-          { path: "register", element: <LazyLoad><RegisterPage /></LazyLoad> },
-          { path: "forgot-password", element: <LazyLoad><ForgotPasswordPage /></LazyLoad> },
-          { path: "reset-password", element: <LazyLoad><ResetPasswordPage /></LazyLoad> },
-          { path: "*", element: <LazyLoad><NotFoundPage /></LazyLoad> },
+          {
+            index: true,
+            element: (
+              <LazyLoad>
+                <HomePage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "about",
+            element: (
+              <LazyLoad>
+                <AboutPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "sermons",
+            element: (
+              <LazyLoad>
+                <SermonsPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "events",
+            element: (
+              <LazyLoad>
+                <EventsPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "events/:eventId",
+            element: (
+              <LazyLoad>
+                <EventDetailPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "contact",
+            element: (
+              <LazyLoad>
+                <ContactPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "login",
+            element: (
+              <LazyLoad>
+                <LoginPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "register",
+            element: (
+              <LazyLoad>
+                <RegisterPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "forgot-password",
+            element: (
+              <LazyLoad>
+                <ForgotPasswordPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "reset-password",
+            element: (
+              <LazyLoad>
+                <ResetPasswordPage />
+              </LazyLoad>
+            ),
+          },
+          {
+            path: "*",
+            element: (
+              <LazyLoad>
+                <NotFoundPage />
+              </LazyLoad>
+            ),
+          },
         ],
       },
       {
@@ -134,39 +253,121 @@ export const router = createBrowserRouter([
             element: <DashboardShell />,
             children: [
               /* Main Admin Entry point rendering tabbed UI */
-              { index: true, element: <LazyLoad><AdminDashboard /></LazyLoad> },
-              { path: "eventsdb", element: <LazyLoad><EventsDashboard /></LazyLoad> },
-              { path: "messages", element: <LazyLoad><MessagesPage /></LazyLoad> },
-              { path: "settings", element: <LazyLoad><SettingsPage /></LazyLoad> },
+              {
+                index: true,
+                element: (
+                  <LazyLoad>
+                    <AdminDashboard />
+                  </LazyLoad>
+                ),
+              },
+              {
+                path: "eventsdb",
+                element: (
+                  <LazyLoad>
+                    <EventsDashboard />
+                  </LazyLoad>
+                ),
+              },
+              {
+                path: "messages",
+                element: (
+                  <LazyLoad>
+                    <MessagesPage />
+                  </LazyLoad>
+                ),
+              },
+              {
+                path: "settings",
+                element: (
+                  <LazyLoad>
+                    <SettingsPage />
+                  </LazyLoad>
+                ),
+              },
 
               {
-                element: (
-                  <ProtectedRoute allowedRoles={["LEADER", "leader"]} />
-                ),
+                element: <ProtectedRoute allowedRoles={["LEADER", "leader"]} />,
                 children: [
-                  { path: "group", element: <LazyLoad><GroupPage /></LazyLoad> },
-                  { path: "attendance", element: <LazyLoad><AttendancePage /></LazyLoad> },
-                  { path: "resources", element: <LazyLoad><ResourcesPage /></LazyLoad> },
+                  {
+                    path: "group",
+                    element: (
+                      <LazyLoad>
+                        <GroupPage />
+                      </LazyLoad>
+                    ),
+                  },
+                  {
+                    path: "attendance",
+                    element: (
+                      <LazyLoad>
+                        <AttendancePage />
+                      </LazyLoad>
+                    ),
+                  },
+                  {
+                    path: "resources",
+                    element: (
+                      <LazyLoad>
+                        <ResourcesPage />
+                      </LazyLoad>
+                    ),
+                  },
                 ],
               },
 
               {
                 element: (
                   <ProtectedRoute
-                    allowedRoles={["ADMIN", "PASTOR", "PASTORS", "admin", "pastor", "pastors"]}
+                    allowedRoles={[
+                      "ADMIN",
+                      "PASTOR",
+                      "PASTORS",
+                      "admin",
+                      "pastor",
+                      "pastors",
+                    ]}
                   />
                 ),
                 children: [
-                  { path: "members", element: <LazyLoad><MembersPage /></LazyLoad> },
-                  { path: "members/add", element: <LazyLoad><AddMembersPage /></LazyLoad> },
-                  { path: "members/edit/:id", element: <LazyLoad><AddMembersPage /></LazyLoad> },
+                  {
+                    path: "members",
+                    element: (
+                      <LazyLoad>
+                        <MembersPage />
+                      </LazyLoad>
+                    ),
+                  },
+                  {
+                    path: "members/add",
+                    element: (
+                      <LazyLoad>
+                        <AddMembersPage />
+                      </LazyLoad>
+                    ),
+                  },
+                  {
+                    path: "members/edit/:id",
+                    element: (
+                      <LazyLoad>
+                        <AddMembersPage />
+                      </LazyLoad>
+                    ),
+                  },
                 ],
               },
 
               {
                 element: <ProtectedRoute allowedRoles={["ADMIN", "admin"]} />,
                 children: [
-                  { path: "leaders", element: <LazyLoad><LeadersPage /></LazyLoad> },
+                  {
+                    path: "leaders",
+                    element: (
+                      <LazyLoad>
+                        <LeadersPage />
+                      </LazyLoad>
+                    ),
+                  },
                 ],
               },
             ],

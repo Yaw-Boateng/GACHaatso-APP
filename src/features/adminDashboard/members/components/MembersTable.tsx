@@ -7,10 +7,10 @@ import {
   Phone,
   MapPin,
   Briefcase,
-  AlertCircle,
   UserX,
   Plus,
   Calendar,
+  AlertCircle,
 } from "lucide-react";
 import { Member } from "../types";
 import ProtectedImage from "../../../../components/common/ProtectedImage";
@@ -30,7 +30,6 @@ export const MembersTable: React.FC<MembersTableProps> = ({
   onAssignLeader,
   onDelete,
 }) => {
-  // Helper to format dates safely
   const formatDate = (dateString?: string) => {
     if (!dateString) return "—";
     try {
@@ -77,20 +76,18 @@ export const MembersTable: React.FC<MembersTableProps> = ({
               </tr>
             ) : (
               members.map((member) => {
-                const avatar = member.imageUrl || (member as any).avatarUrl;
-                const createdAt =
-                  member.createdAt || (member as any).joinedDate;
-                const leader =
-                  member.leader ||
-                  (member as any).assignedLeader ||
-                  (member as any).leaderInfo;
+                // Safely extract optional/fallback fields at row boundary
+                const memberData = member as Record<string, any>;
+                const avatar = member.imageUrl || memberData.avatarUrl;
+                const createdAt = member.createdAt || memberData.joinedDate;
+                const leader = member.leader || memberData.assignedLeader || memberData.leaderInfo;
 
                 return (
                   <tr
                     key={member.id}
                     className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors group relative"
                   >
-                    {/* 1. Member Details */}
+                    {/* Member Details */}
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3.5">
                         {avatar ? (
@@ -122,14 +119,11 @@ export const MembersTable: React.FC<MembersTableProps> = ({
                       </div>
                     </td>
 
-                    {/* 2. Contact & Address */}
+                    {/* Contact & Address */}
                     <td className="py-4 px-5">
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-1.5 text-xs font-mono font-medium text-slate-800 dark:text-slate-200">
-                          <Phone
-                            size={13}
-                            className="text-slate-400 shrink-0"
-                          />
+                          <Phone size={13} className="text-slate-400 shrink-0" />
                           <span>{member.phoneNumber || "—"}</span>
                         </div>
                         {member.emergencyNumber && (
@@ -145,10 +139,7 @@ export const MembersTable: React.FC<MembersTableProps> = ({
                           className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 truncate max-w-[180px]"
                           title={member.residenceAddress}
                         >
-                          <MapPin
-                            size={13}
-                            className="text-slate-400 shrink-0"
-                          />
+                          <MapPin size={13} className="text-slate-400 shrink-0" />
                           <span className="truncate">
                             {member.residenceAddress || "No address listed"}
                           </span>
@@ -156,7 +147,7 @@ export const MembersTable: React.FC<MembersTableProps> = ({
                       </div>
                     </td>
 
-                    {/* 3. Demographics */}
+                    {/* Demographics */}
                     <td className="py-4 px-5">
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -184,7 +175,7 @@ export const MembersTable: React.FC<MembersTableProps> = ({
                       </div>
                     </td>
 
-                    {/* 4. Assigned Leader */}
+                    {/* Assigned Leader */}
                     <td className="py-4 px-5">
                       {leader ? (
                         <div className="flex items-center gap-2">
@@ -214,18 +205,15 @@ export const MembersTable: React.FC<MembersTableProps> = ({
                       )}
                     </td>
 
-                    {/* 5. Created At */}
+                    {/* Created At */}
                     <td className="py-4 px-5">
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        <Calendar
-                          size={13}
-                          className="text-slate-400 shrink-0"
-                        />
+                        <Calendar size={13} className="text-slate-400 shrink-0" />
                         <span>{formatDate(createdAt)}</span>
                       </div>
                     </td>
 
-                    {/* 6. Actions */}
+                    {/* Actions */}
                     <td className="py-4 px-6 text-right">
                       <div className="inline-flex items-center gap-1 p-1 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 rounded-xl shadow-2xs">
                         <button
